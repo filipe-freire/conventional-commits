@@ -89,7 +89,7 @@ fn main() {
 
     // Prompt for commit message using inquire
     let msg = Text::new("Commit message:")
-        .with_help_message("short and sweet 🍩")
+        .with_help_message("write a clear and concise message that describes the changes made")
         .with_validator(|value: &str| {
             if value.trim().is_empty() {
                 Err("Please enter a commit message".into())
