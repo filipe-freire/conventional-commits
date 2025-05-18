@@ -101,10 +101,16 @@ fn main() {
 
     let msg = match msg {
         Ok(message) => message,
-        Err(_) => {
-            println!("Error getting commit message");
-            exit(1);
-        }
+        Err(e) => match e {
+            inquire::InquireError::OperationInterrupted => {
+                println!("Commit cancelled");
+                exit(0);
+            }
+            _ => {
+                println!("Error executing git commit: {}", e);
+                exit(1);
+            }
+        },
     };
 
     // Execute git add .
