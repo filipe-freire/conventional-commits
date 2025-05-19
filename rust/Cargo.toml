@@ -1,5 +1,5 @@
 [package]
-name = "conventional-commits"
+name = "conventional-commits-cli"
 version = "1.0.0"
 edition = "2024"
 

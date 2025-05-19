@@ -1,0 +1,88 @@
+name: Build and Release Artifacts
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - v*
+  release:
+    types: [published]
+
+jobs:
+  build:
+    name: Build Release Artifacts
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          components: clippy
+
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.24
+
+      - name: "Get Previous tag"
+        id: previous_tag
+        uses: "WyriHaximus/github-action-get-previous-tag@v1"
+        with:
+          fallback: 1.0.0
+
+      - name: Trigger release
+        uses: actions/create-release@v1
+        id: create_release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.previous_tag.outputs.tag }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Build Deno artifacts
+        run: |
+          cd ./deno && deno task compile
+
+      - name: Build Rust artifacts
+        run: |
+          cd ./rust && cargo build --release
+
+      - name: Build Go artifacts
+        run: |
+          cd ./go && go build -ldflags "-s -w" -o build
+
+      - name: Upload Deno artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: conventional-commits-deno
+          path: ./deno/build/conventional-commits-cli
+          if-no-files-found: error
+
+      - name: Upload Rust artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: conventional-commits-rust
+          path: ./rust/target/release/conventional-commits-cli
+          if-no-files-found: error
+
+      - name: Upload Go artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: conventional-commits-go
+          path: ./go/build/conventional-commits-cli
+          if-no-files-found: error
