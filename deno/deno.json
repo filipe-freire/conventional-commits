@@ -1,7 +1,7 @@
 {
 	"tasks": {
 		"dev": "deno run --allow-env --allow-run --watch main.ts",
-		"compile": "deno compile --allow-env --allow-run --output build/conventional-commits-cli main.ts"
+		"compile": "deno compile --allow-env --allow-run --output build/conventional-commits main.ts"
 	},
 	"imports": {
 		"@std/assert": "jsr:@std/assert@1"
